@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Web GIS Indonesia - Multi Poligon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 85vh; width: 100%; }
+    body { font-family: sans-serif; padding: 10px; }
+  </style>
+</head>
+<body>
+
+<h2>Web GIS Indonesia — Multi Layer Poligon + Titik</h2>
+
+<form onsubmit="addMarker(); return false;">
+  <label>Latitude: <input type="number" step="any" id="latInput" required></label>
+  <label>Longitude: <input type="number" step="any" id="lngInput" required></label>
+  <button type="submit">Tampilkan Titik</button>
+</form>
+
+<p>
+  <label>Upload CSV Titik:
+    <input type="file" id="csvFile" accept=".csv">
+  </label>
+  <button onclick="loadCSV()">Tampilkan CSV</button>
+</p>
+
+<p>
+  <label>Import GeoJSON Titik:
+    <input type="file" id="geojsonFile" accept=".geojson">
+  </label>
+  <button onclick="loadGeoJSON()">Import Titik</button>
+  <button onclick="downloadGeoJSON()">💾 Simpan Titik</button>
+</p>
+
+<p>
+  <button onclick="resetToIndonesia()">🧱 Pusatkan ke Indonesia</button>
+  <button onclick="zoomToPoligon()">📐 Zoom Semua Poligon</button>
+  <button onclick="zoomToMarker()">📍 Zoom Semua Titik</button>
+</p>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([-2.5, 118], 5);
+
+  const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  });
+
+  const satelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/' +
+    'World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri'
+  });
+
+  osm.addTo(map);
+  const baseLayers = { "OpenStreetMap": osm, "Satelit": satelit };
+  const layerControl = L.control.layers(baseLayers).addTo(map);
+
+  const iconCustom = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -30]
+  });
+
+  let allMarkers = [];
+
+  function addMarker(lat = null, lng = null) {
+    lat = lat ?? parseFloat(document.getElementById("latInput").value);
+    lng = lng ?? parseFloat(document.getElementById("lngInput").value);
+
+    const marker = L.marker([lat, lng], {
+      icon: iconCustom,
+      draggable: true
+    }).addTo(map).bindPopup(`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`).openPopup();
+
+    marker.on('dragend', () => {
+      const pos = marker.getLatLng();
+      marker.setPopupContent(`Lat: ${pos.lat.toFixed(6)}, Lng: ${pos.lng.toFixed(6)}`);
+    });
+
+    allMarkers.push(marker);
+    map.setView([lat, lng], 10);
+  }
+
+  map.on('click', e => {
+    const { lat, lng } = e.latlng;
+    document.getElementById('latInput').value = lat.toFixed(6);
+    document.getElementById('lngInput').value = lng.toFixed(6);
+    addMarker(lat, lng);
+  });
+
+  function loadCSV() {
+    const file = document.getElementById('csvFile').files[0];
+    if (!file) return alert("Pilih file .csv dulu.");
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const lines = e.target.result.split('\n');
+      lines.forEach(line => {
+        const [latStr, lngStr] = line.trim().split(',');
+        const lat = parseFloat(latStr), lng = parseFloat(lngStr);
+        if (!isNaN(lat) && !isNaN(lng)) addMarker(lat, lng);
+      });
+    };
+    reader.readAsText(file);
+  }
+
+  function loadGeoJSON() {
+    const file = document.getElementById('geojsonFile').files[0];
+    if (!file) return alert("Pilih file GeoJSON.");
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const data = JSON.parse(e.target.result);
+      if (!data || !data.features) return alert("Format tidak valid.");
+      data.features.forEach(f => {
+        if (f.geometry.type === "Point") {
+          const [lng, lat] = f.geometry.coordinates;
+          addMarker(lat, lng);
+        }
+      });
+    };
+    reader.readAsText(file);
+  }
+
+  function downloadGeoJSON() {
+    const features = allMarkers.map(m => {
+      const { lat, lng } = m.getLatLng();
+      return {
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [lng, lat] },
+        properties: { popup: m.getPopup()?.getContent() || "" }
+      };
+    });
+    const geojson = { type: "FeatureCollection", features };
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "titik.geojson";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function loadGeojsonLayer(url, layerName, styleOptions) {
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        const layer = L.geoJSON(data, {
+          style: styleOptions,
+          onEachFeature: (feature, lyr) => {
+            const nama = feature.properties?.provinsi || feature.properties?.nama || layerName;
+            lyr.bindPopup(`${layerName}: ${nama}`);
+          }
+        }).addTo(map);
+
+        map.fitBounds(layer.getBounds());
+        layerControl.addOverlay(layer, layerName);
+      });
+  }
+
+  // Contoh pemanggilan layer
+  loadGeojsonLayer('perairan_provinsi_simplified.geojson', 'Perairan Provinsi', {
+    color: 'navy', fillColor: 'aqua', fillOpacity: 0.4
+  });
+
+  function resetToIndonesia() {
+    map.setView([-2.5, 118], 5);
+  }
+
+  function zoomToPoligon() {
+    const allPoligonBounds = [];
+    map.eachLayer(layer => {
+      if (layer instanceof L.GeoJSON && layer.getBounds) {
+        allPoligonBounds.push(layer.getBounds());
+      }
+    });
+
+    if (allPoligonBounds.length > 0) {
+      let bounds = allPoligonBounds[0];
+      for (let i = 1; i < allPoligonBounds.length; i++) {
+        bounds.extend(allPoligonBounds[i]);
+      }
+      map.fitBounds(bounds);
+    } else {
+      alert("Belum ada layer poligon yang dimuat.");
+    }
+  }
+
+  function zoomToMarker() {
+    if (allMarkers.length === 0) {
+      alert("Belum ada marker titik.");
+      return;
+    }
+    const latlngs = allMarkers.map(m => m.getLatLng());
+    const bounds = L.latLngBounds(latlngs);
+    map.fitBounds(bounds);
+  }
+</script>
+
+</body>
+</html>
