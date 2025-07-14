@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Web GIS Indonesia - Multi Poligon</title>
+  <title>Informasi Spasial Direktorat Jasa Bahari</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<h2>Web GIS Indonesia — Multi Layer Poligon + Titik</h2>
+<h2>Area Kewenangan Direktorat Jasa Bahari</h2>
 
 <form onsubmit="addMarker(); return false;">
   <label>Latitude: <input type="number" step="any" id="latInput" required></label>
@@ -164,14 +164,42 @@
       });
   }
 
-  // Contoh pemanggilan layer
-  loadGeojsonLayer('03_KKPN.json', 'Kawasan Konservasi', {
-    color: 'dark green', fillColor: 'gren', fillOpacity: 0.4
-  });
+  //pemanggilan layer geojson
+loadGeojsonLayer('03_KKPN.json', 'Kawasan Konservasi', {
+  color: 'darkgreen',
+  fillColor: 'green',
+  fillOpacity: 0.4
+});
 
   loadGeojsonLayer('perairan_provinsi_simplified.geojson', 'Perairan Provinsi', {
     color: 'dark red', fillColor: 'red', fillOpacity: 0.4
   });
+
+
+  //Popup Atribut geojson
+function loadGeojsonLayer(url, layerName, styleOptions) {
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const layer = L.geoJSON(data, {
+        style: styleOptions,
+        onEachFeature: (feature, layer) => {
+          const props = feature.properties;
+
+          const popupContent = Object.entries(props)
+            .map(([key, value]) => `<strong>${key}</strong>: ${value}`)
+            .join('<br>');
+
+          layer.bindPopup(popupContent);
+        }
+      }).addTo(map);
+
+      map.fitBounds(layer.getBounds());
+      layerControl.addOverlay(layer, layerName);
+    });
+}
+
+
 
   
   function resetToIndonesia() {
