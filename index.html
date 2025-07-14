@@ -31,6 +31,11 @@
   margin-top: 2px;
   opacity: 0.7;
 }
+
+#legend-content {
+  transition: all 0.3s ease;
+}
+    
   </style>
 
   
@@ -254,10 +259,29 @@
   ];
 
   const legendDiv = document.getElementById('legend');
-  legendDiv.innerHTML = '<strong>Legenda</strong><br>' + legendData.map(([label, color]) =>
-    `<i style="background:${color}"></i>${label}`
-  ).join('<br>');
+   legendDiv.innerHTML = `
+  <div id="legend-header" style="cursor:pointer; font-weight:bold; margin-bottom:4px;">
+    ▾ Legenda
+  </div>
+  <div id="legend-content">
+    ${legendData.map(([label, color]) =>
+      `<i style="background:${color}"></i>${label}`
+    ).join('<br>')}
+  </div>
+`;
 
+  document.getElementById('legend-header').addEventListener('click', () => {
+  const content = document.getElementById('legend-content');
+  const header = document.getElementById('legend-header');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    header.innerHTML = '▾ Legenda';
+  } else {
+    content.style.display = 'none';
+    header.innerHTML = '▸ Legenda';
+  }
+});
+  
 </script>
 
 </body>
