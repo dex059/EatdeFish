@@ -9,26 +9,28 @@
     #map { height: 75vh; width: 100%; }
     body { font-family: sans-serif; padding: 8px; }
     
-     .legend {
-    position: absolute;
-    bottom: 1%;
-    right: 1%;
-    z-index: 1000;
-    background: white;
-    padding: 6px 10px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    border-radius: 5px;
-    font-size: 8px;
-    line-height: 15px;
-  }
-  .legend i {
-    width: 14px;
-    height: 14px;
-    float: left;
-    margin-right: 8px;
-    margin-top: 2px;
-    opacity: 0.7;
-  }
+    .legend {
+  position: fixed; /* lebih baik dari absolute untuk responsivitas */
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  background: white;
+  padding: 6px 10px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  border-radius: 5px;
+  font-size: 0.75rem;
+  line-height: 1.2rem;
+  max-width: 90vw; /* agar tidak melebar di layar kecil */
+  overflow-wrap: break-word;
+}
+.legend i {
+  width: 14px;
+  height: 14px;
+  float: left;
+  margin-right: 8px;
+  margin-top: 2px;
+  opacity: 0.7;
+}
   </style>
 
   
