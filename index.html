@@ -25,18 +25,15 @@
     <input type="file" id="csvFile" accept=".csv">
   </label>
   <button onclick="loadCSV()">Tampilkan CSV</button>
-</p>
-
-<p>
   <label>Import GeoJSON Titik:
     <input type="file" id="geojsonFile" accept=".geojson">
   </label>
   <button onclick="loadGeoJSON()">Import Titik</button>
   <button onclick="downloadGeoJSON()">💾 Simpan Titik</button>
-  <button onclick="clearAllMarkers()">🗑️ Hapus Semua Titik</button>
 </p>
 
 <p>
+  <button onclick="clearAllMarkers()">🗑️ Hapus Semua Titik</button>
   <button onclick="resetToIndonesia()">🧱 Pusatkan ke Indonesia</button>
   <button onclick="zoomToPoligon()">📐 Zoom Semua Poligon</button>
   <button onclick="zoomToMarker()">📍 Zoom Semua Titik</button>
