@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<h2>Area Kewenangan Direktorat Jasa Bahari</h2>
+<h2>Wilayah Kewenangan Direktorat Jasa Bahari</h2>
 
 <form onsubmit="addMarker(); return false;">
   <label>Latitude: <input type="number" step="any" id="latInput" required></label>
@@ -33,13 +33,13 @@
   </label>
   <button onclick="loadGeoJSON()">Import Titik</button>
   <button onclick="downloadGeoJSON()">💾 Simpan Titik</button>
+  <button onclick="clearAllMarkers()">🗑️ Hapus Semua Titik</button>
 </p>
 
 <p>
   <button onclick="resetToIndonesia()">🧱 Pusatkan ke Indonesia</button>
   <button onclick="zoomToPoligon()">📐 Zoom Semua Poligon</button>
   <button onclick="zoomToMarker()">📍 Zoom Semua Titik</button>
-  <button onclick="clearAllMarkers()">🗑️ Hapus Semua Titik</button>
 </p>
 
 <div id="map"></div>
@@ -69,6 +69,7 @@
   });
 
   let allMarkers = [];
+  const geojsonLayers = {};  // untuk menyimpan layer geojson secara manual
 
   function addMarker(lat = null, lng = null) {
     lat = lat ?? parseFloat(document.getElementById("latInput").value);
@@ -88,6 +89,11 @@
     map.setView([lat, lng], 10);
   }
 
+  function clearAllMarkers() {
+    allMarkers.forEach(m => map.removeLayer(m));
+    allMarkers = [];
+  }
+
   map.on('click', e => {
     const { lat, lng } = e.latlng;
     document.getElementById('latInput').value = lat.toFixed(6);
@@ -95,11 +101,6 @@
     addMarker(lat, lng);
   });
 
-function clearAllMarkers() {
-  allMarkers.forEach(m => map.removeLayer(m));
-  allMarkers = [];
-}
-  
   function loadCSV() {
     const file = document.getElementById('csvFile').files[0];
     if (!file) return alert("Pilih file .csv dulu.");
@@ -159,87 +160,49 @@ function clearAllMarkers() {
       .then(data => {
         const layer = L.geoJSON(data, {
           style: styleOptions,
-          onEachFeature: (feature, lyr) => {
-            const nama = feature.properties?.provinsi || feature.properties?.nama || layerName;
-            lyr.bindPopup(`${layerName}: ${nama}`);
+          onEachFeature: (feature, layer) => {
+            const props = feature.properties;
+            const popupContent = Object.entries(props)
+              .map(([key, value]) => `<strong>${key}</strong>: ${value}`)
+              .join('<br>');
+            layer.bindPopup(popupContent);
           }
-        }).addTo(map);
+        });
 
-        map.fitBounds(layer.getBounds());
-        layerControl.addOverlay(layer, layerName);
+        geojsonLayers[layerName] = layer;
       });
   }
 
-  //pemanggilan layer geojson
-  
-loadGeojsonLayer('07_KAW_simplified.json', 'KAW', {
-  color: 'LightSkyBlue',
-  fillColor: 'LightSkyBlue',
-  fillOpacity: 0.4
-});
+  // daftar layer dan urutan manual
+  const orderedLayers = [
+    
+    ['07_KAW_simplified.json', 'KAW', 'LightSkyBlue'],
+    ['06_Perairan_Prov_simplified.json', 'Perairan Provinsi', 'Salmon'],
+    ['05_KSN_Penetapan.json', 'KSN sudah penetapan', 'CornflowerBlue'],
+    ['04_KSN_BBK.json', 'KSN BBK (belum penetapan)', 'Plum'],
+    ['03_KKPN.json', 'Kawasan Konservasi', 'green'],
+    ['02_Wilper_KSNT_PPKT.json', 'Wilper KSNT PPKT', 'SteelBlue'],
+    ['01_Kawasan_Batam.json', 'KPBPB Batam', 'indianred']
+  ];
 
-loadGeojsonLayer('06_Perairan_Prov_simplified.json', 'Perairan Provinsi', {
-  color: 'Salmon',
-  fillColor: 'Salmon',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('05_KSN_Penetapan.json', 'KSN sudah penetapan', {
-  color: 'CornflowerBlue',
-  fillColor: 'CornflowerBlue',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('04_KSN_BBK.json', 'KSN BBK (belum penetapan)', {
-  color: 'Plum',
-  fillColor: 'Plum',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('03_KKPN.json', 'Kawasan Konservasi', {
-  color: 'green',
-  fillColor: 'green',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('02_Wilper_KSNT_PPKT.json', 'Wilper KSNT PPKT', {
-  color: 'SteelBlue',
-  fillColor: 'SteelBlue',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('01_Kawasan_Batam.json', 'KPBPB Batam', {
-  color: 'indianred',
-  fillColor: 'indianred',
-  fillOpacity: 0.4
-});
-
-  //Popup Atribut geojson
-function loadGeojsonLayer(url, layerName, styleOptions) {
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      const layer = L.geoJSON(data, {
-        style: styleOptions,
-        onEachFeature: (feature, layer) => {
-          const props = feature.properties;
-
-          const popupContent = Object.entries(props)
-            .map(([key, value]) => `<strong>${key}</strong>: ${value}`)
-            .join('<br>');
-
-          layer.bindPopup(popupContent);
-        }
-      }).addTo(map);
-
-      map.fitBounds(layer.getBounds());
-      layerControl.addOverlay(layer, layerName);
+  // panggil semua
+  orderedLayers.forEach(([url, name, color]) => {
+    loadGeojsonLayer(url, name, {
+      color, fillColor: color, fillOpacity: 0.4
     });
-}
+  });
 
+  // tambahkan ke peta setelah semua selesai dimuat (pakai timeout agar async selesai)
+  setTimeout(() => {
+    orderedLayers.forEach(([_, name]) => {
+      const layer = geojsonLayers[name];
+      if (layer) {
+        layer.addTo(map);
+        layerControl.addOverlay(layer, name);
+      }
+    });
+  }, 1000);
 
-
-  
   function resetToIndonesia() {
     map.setView([-2.5, 118], 5);
   }
