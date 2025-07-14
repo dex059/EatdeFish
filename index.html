@@ -168,7 +168,7 @@
               const popupContent = Object.entries(props)
                 .map(([key, value]) => `<strong>${key}</strong>: ${value}`)
                 .join('<br>');
-              layer.bindPopup(popupContent);
+              layer.bindPopup(`<strong>Layer:</strong> ${name}<br>` + popupContent);
             }
           });
           geojsonLayers[name] = layer;
