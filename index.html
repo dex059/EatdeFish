@@ -7,19 +7,19 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     #map { height: 75vh; width: 100%; }
-    body { font-family: sans-serif; padding: 9px; }
+    body { font-family: sans-serif; padding: 8px; }
     
      .legend {
     position: absolute;
-    bottom: 30px;
-    right: 10px;
+    bottom: 1%;
+    right: 1%;
     z-index: 1000;
     background: white;
     padding: 6px 10px;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
     border-radius: 5px;
-    font-size: 13px;
-    line-height: 18px;
+    font-size: 8px;
+    line-height: 15px;
   }
   .legend i {
     width: 14px;
@@ -35,7 +35,7 @@
 </head>
 <body>
 
-<h2>Wilayah Kewenangan Direktorat Jasa Bahari</h2>
+<h2>Informasi Spasial Direktorat Jasa Bahari</h2>
 
 <form onsubmit="addMarker(); return false;">
   <label>Latitude: <input type="number" step="any" id="latInput" required></label>
