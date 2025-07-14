@@ -39,6 +39,7 @@
   <button onclick="resetToIndonesia()">🧱 Pusatkan ke Indonesia</button>
   <button onclick="zoomToPoligon()">📐 Zoom Semua Poligon</button>
   <button onclick="zoomToMarker()">📍 Zoom Semua Titik</button>
+  <button onclick="clearAllMarkers()">🗑️ Hapus Semua Titik</button>
 </p>
 
 <div id="map"></div>
@@ -94,6 +95,11 @@
     addMarker(lat, lng);
   });
 
+function clearAllMarkers() {
+  allMarkers.forEach(m => map.removeLayer(m));
+  allMarkers = [];
+}
+  
   function loadCSV() {
     const file = document.getElementById('csvFile').files[0];
     if (!file) return alert("Pilih file .csv dulu.");
@@ -165,33 +171,10 @@
   }
 
   //pemanggilan layer geojson
-loadGeojsonLayer('01_Kawasan_Batam.json', 'KPBPB Batam', {
-  color: 'indianred',
-  fillColor: 'indianred',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('02_Wilper_KSNT_PPKT.json', 'Wilper KSNT PPKT', {
-  color: 'SteelBlue',
-  fillColor: 'SteelBlue',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('03_KKPN.json', 'Kawasan Konservasi', {
-  color: 'green',
-  fillColor: 'green',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('04_KSN_BBK.json', 'KSN BBK (belum penetapan)', {
-  color: 'Plum',
-  fillColor: 'Plum',
-  fillOpacity: 0.4
-});
-
-loadGeojsonLayer('05_KSN_Penetapan.json', 'KSN sudah penetapan', {
-  color: 'CornflowerBlue',
-  fillColor: 'CornflowerBlue',
+  
+loadGeojsonLayer('07_KAW_simplified.json', 'KAW', {
+  color: 'LightSkyBlue',
+  fillColor: 'LightSkyBlue',
   fillOpacity: 0.4
 });
 
@@ -201,12 +184,35 @@ loadGeojsonLayer('06_Perairan_Prov_simplified.json', 'Perairan Provinsi', {
   fillOpacity: 0.4
 });
 
-loadGeojsonLayer('07_KAW_simplified.json', 'KAW', {
-  color: 'LightSkyBlue',
-  fillColor: 'LightSkyBlue',
+loadGeojsonLayer('05_KSN_Penetapan.json', 'KSN sudah penetapan', {
+  color: 'CornflowerBlue',
+  fillColor: 'CornflowerBlue',
   fillOpacity: 0.4
 });
 
+loadGeojsonLayer('04_KSN_BBK.json', 'KSN BBK (belum penetapan)', {
+  color: 'Plum',
+  fillColor: 'Plum',
+  fillOpacity: 0.4
+});
+
+loadGeojsonLayer('03_KKPN.json', 'Kawasan Konservasi', {
+  color: 'green',
+  fillColor: 'green',
+  fillOpacity: 0.4
+});
+
+loadGeojsonLayer('02_Wilper_KSNT_PPKT.json', 'Wilper KSNT PPKT', {
+  color: 'SteelBlue',
+  fillColor: 'SteelBlue',
+  fillOpacity: 0.4
+});
+
+loadGeojsonLayer('01_Kawasan_Batam.json', 'KPBPB Batam', {
+  color: 'indianred',
+  fillColor: 'indianred',
+  fillOpacity: 0.4
+});
 
   //Popup Atribut geojson
 function loadGeojsonLayer(url, layerName, styleOptions) {
