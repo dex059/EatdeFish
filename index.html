@@ -45,12 +45,13 @@
 <h2>Informasi Spasial Direktorat Jasa Bahari</h2>
 
 <form onsubmit="addMarker(); return false;">
-  <label>Latitude: <input type="number" step="any" id="latInput" required></label>
-  <label>Longitude: <input type="number" step="any" id="lngInput" required></label>
+  <label>Lat DD: <input type="number" step="any" id="latInput" required></label>
+  <label>Long DD: <input type="number" step="any" id="lngInput" required></label>
   <button type="submit">Tampilkan Titik</button>
 </form>
-
-<h4>Input Titik Format DMS</h4>
+  
+<br>
+  
 <form onsubmit="addDMSMarker(); return false;">
   <label>
     Lat DMS:
@@ -62,7 +63,7 @@
     <input type="number" id="latMin" placeholder="′" style="width:50px" required>'
     <input type="number" step="any" id="latSec" placeholder="″" style="width:50px" required>"
   </label>
-  <br>
+  
   <label>
     Lon DMS:
     <select id="lngDir">
@@ -73,7 +74,6 @@
     <input type="number" id="lngMin" placeholder="′" style="width:50px" required>'
     <input type="number" step="any" id="lngSec" placeholder="″" style="width:50px" required>"
   </label>
-  <br>
   <button type="submit">Tampilkan Titik DMS</button>
 </form>
 
