@@ -50,6 +50,34 @@
   <button type="submit">Tampilkan Titik</button>
 </form>
 
+<h4>Input Titik Format DMS</h4>
+<form onsubmit="addDMSMarker(); return false;">
+  <label>
+    Lat DMS:
+    <select id="latDir">
+      <option value="1">N</option>
+      <option value="-1">S</option>
+    </select>
+    <input type="number" id="latDeg" placeholder="°" style="width:50px" required>°
+    <input type="number" id="latMin" placeholder="′" style="width:50px" required>'
+    <input type="number" step="any" id="latSec" placeholder="″" style="width:50px" required>"
+  </label>
+  <br>
+  <label>
+    Lon DMS:
+    <select id="lngDir">
+      <option value="1">E</option>
+      <option value="-1">W</option>
+    </select>
+    <input type="number" id="lngDeg" placeholder="°" style="width:50px" required>°
+    <input type="number" id="lngMin" placeholder="′" style="width:50px" required>'
+    <input type="number" step="any" id="lngSec" placeholder="″" style="width:50px" required>"
+  </label>
+  <br>
+  <button type="submit">Tampilkan Titik DMS</button>
+</form>
+
+  
 <p>
   <label>Upload CSV Titik:
     <input type="file" id="csvFile" accept=".csv">
@@ -109,6 +137,27 @@
     map.setView([lat, lng], 10);
   }
 
+function dmsToDecimal(deg, min, sec, dir) {
+  return dir * (Math.abs(deg) + (min / 60) + (sec / 3600));
+}
+
+function addDMSMarker() {
+  const lat = dmsToDecimal(
+    parseFloat(document.getElementById('latDeg').value),
+    parseFloat(document.getElementById('latMin').value),
+    parseFloat(document.getElementById('latSec').value),
+    parseFloat(document.getElementById('latDir').value)
+  );
+  const lng = dmsToDecimal(
+    parseFloat(document.getElementById('lngDeg').value),
+    parseFloat(document.getElementById('lngMin').value),
+    parseFloat(document.getElementById('lngSec').value),
+    parseFloat(document.getElementById('lngDir').value)
+  );
+  addMarker(lat, lng);
+}
+
+  
   function clearAllMarkers() {
     allMarkers.forEach(m => map.removeLayer(m));
     allMarkers = [];
