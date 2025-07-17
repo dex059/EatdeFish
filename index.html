@@ -109,6 +109,17 @@
   const baseLayers = { "OpenStreetMap": osm, "Satelit": satelit };
   const layerControl = L.control.layers(baseLayers).addTo(map);
 
+
+  // Tambah layer Allen Coral Atlas Benthic via WMS
+const acaBenthic = L.tileLayer.wms('https://allencoralatlas.org/geoserver/ows', {
+  layers: 'reef_habitat:benthic',
+  format: 'image/png',
+  transparent: true,
+  attribution: '&copy; Allen Coral Atlas'
+});
+layerControl.addOverlay(acaBenthic, 'Allen Coral Atlas – Benthic');
+
+  
   const iconCustom = L.icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
     iconSize: [30, 30],
